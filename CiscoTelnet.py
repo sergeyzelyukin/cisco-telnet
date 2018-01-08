@@ -12,12 +12,16 @@ MODE_EXEC        = "EXEC"
 MODE_ENABLE_PASS = "ENABLE PASS"
 MODE_ENABLE      = "ENABLE"
 
+WAIT_TIMEOUT     = 3
+
 class CiscoTelnet(Telnet):
   def __init__(self, host, verbose=False):
     self._host = host
     self._verbose = verbose
     self._mode = MODE_INIT
+
     Telnet.__init__(self, host)
+
     self._mode = MODE_CONNECTED
 
   def __enter__(self):
@@ -28,7 +32,7 @@ class CiscoTelnet(Telnet):
       self.logout()
     self.close()
 
-  def login(self, final_mode = MODE_ENABLE, max_steps = 6):
+  def login(self, final_mode = MODE_ENABLE, max_steps = 10):
     if not self._mode == MODE_CONNECTED:
       return False
 
@@ -43,7 +47,7 @@ class CiscoTelnet(Telnet):
       exec_pattern = re.compile(">$", re.IGNORECASE)
       enable_pattern = re.compile("#$", re.IGNORECASE)
 
-      answer = self.expect([username_pattern, password_pattern, exec_pattern, enable_pattern], 3)
+      answer = self.expect([username_pattern, password_pattern, exec_pattern, enable_pattern], WAIT_TIMEOUT)
       if self._verbose: 
         print answer[2]
 
@@ -52,7 +56,9 @@ class CiscoTelnet(Telnet):
 
       if answer[0] == 0:
         self._mode = MODE_USER
+
         username = raw_input("[%s] username: "%(self._host))
+
         self.write("{0}\n".format(username))
       elif answer[0] == 1:
         if self._mode == MODE_CONNECTED:
@@ -63,6 +69,7 @@ class CiscoTelnet(Telnet):
           self._mode = MODE_ENABLE_PASS
         else:
           pass
+
         if self._mode == MODE_USER_PASS:
           prompt="[%s] %s's password: "%(self._host, username)
         elif self._mode == MODE_LINE_PASS:
@@ -70,21 +77,24 @@ class CiscoTelnet(Telnet):
         elif self._mode == MODE_ENABLE_PASS:
           prompt="[%s] enable password: "%(self._host)
         password = getpass.getpass(prompt=prompt)
+
         self.write("{0}\n".format(password))
       elif answer[0] == 2:
         self._mode = MODE_EXEC
+
         if self._mode == final_mode:
           self._stop_pattern = exec_pattern
           self.write("terminal length 0\n")
-          self.expect([self._stop_pattern], 3)
+          self.expect([self._stop_pattern], WAIT_TIMEOUT)
           return True
         self.write("en\n")
       elif answer[0] == 3:
         self._mode = MODE_ENABLE
+
         if self._mode == final_mode:
           self._stop_pattern = enable_pattern
           self.write("terminal length 0\n")
-          self.expect([self._stop_pattern], 3)
+          self.expect([self._stop_pattern], WAIT_TIMEOUT)
           return True
 
   def logout(self):
@@ -93,12 +103,45 @@ class CiscoTelnet(Telnet):
 
   def cmd(self, command):
     self.read_lazy()
+
     self.write(command+"\n")
-    answer = self.expect([self._stop_pattern], 3)
+    answer = self.expect([self._stop_pattern], WAIT_TIMEOUT)
+
     if not answer[1]:
       return None
     else:
       if self._verbose:
         print answer[2]
+      
       return answer[2]
+
+  def conf(self, config_lines):
+    self.read_lazy()
+
+    read_buffer = ""
+    conf_pattern = re.compile("\)#$", re.IGNORECASE)
+
+    for line in ["conf t\n"]+config_lines:
+      self.write(line+"\n")
+      answer = self.expect([conf_pattern], WAIT_TIMEOUT)
+      if answer[1]:
+        read_buffer += answer[2]     
+
+    self.write("\x1A")
+    answer = self.expect([self._stop_pattern], WAIT_TIMEOUT)
+    if answer[1]:
+      read_buffer += answer[2]
+
+    if self._verbose:
+      print read_buffer
+
+    return read_buffer
+
+
+  def wr(self):
+    self.read_lazy()
+
+    self.write("wr\n")
+    answer = self.expect([self._stop_pattern], WAIT_TIMEOUT)
+
 
