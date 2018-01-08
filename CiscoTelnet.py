@@ -15,7 +15,7 @@ MODE_ENABLE      = "ENABLE"
 WAIT_TIMEOUT     = 3
 
 class CiscoTelnet(Telnet):
-  def __init__(self, host, verbose=False):
+  def __init__(self, host, verbose = False):
     self._host = host
     self._verbose = verbose
     self._mode = MODE_INIT
@@ -32,7 +32,7 @@ class CiscoTelnet(Telnet):
       self.logout()
     self.close()
 
-  def login(self, final_mode = MODE_ENABLE, max_steps = 10):
+  def login(self, interactive = True, final_mode = MODE_ENABLE, user = None, user_pass = None, line_pass = None, enable_pass = None, max_steps = 10):
     if not self._mode == MODE_CONNECTED:
       return False
 
@@ -57,7 +57,12 @@ class CiscoTelnet(Telnet):
       if answer[0] == 0:
         self._mode = MODE_USER
 
-        username = raw_input("[%s] username: "%(self._host))
+        if user:
+          username = user
+        else:
+          if not interactive:
+            return False
+          username = raw_input("[%s] username: "%(self._host))
 
         self.write("{0}\n".format(username))
       elif answer[0] == 1:
@@ -71,13 +76,27 @@ class CiscoTelnet(Telnet):
           pass
 
         if self._mode == MODE_USER_PASS:
-          prompt="[%s] %s's password: "%(self._host, username)
+          if user_pass:
+            password = user_pass
+          else:
+            if not interactive:
+              return False
+            password = getpass.getpass(prompt="[%s] %s's password: "%(self._host, username))
         elif self._mode == MODE_LINE_PASS:
-          prompt="[%s] line password: "%(self._host)
+          if line_pass:
+            password = line_pass
+          else:
+            if not interactive:
+              return False
+            password = getpass.getpass(prompt="[%s] line password: "%(self._host))
         elif self._mode == MODE_ENABLE_PASS:
-          prompt="[%s] enable password: "%(self._host)
-        password = getpass.getpass(prompt=prompt)
-
+          if enable_pass:
+            password = enable_pass
+          else:
+            if not interactive:
+              return False
+            password = getpass.getpass(prompt="[%s] enable password: "%(self._host))
+  
         self.write("{0}\n".format(password))
       elif answer[0] == 2:
         self._mode = MODE_EXEC

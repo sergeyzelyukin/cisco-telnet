@@ -8,13 +8,13 @@ def main():
   for ip in ["10.116.1.1"]:
     with CiscoTelnet.CiscoTelnet(ip, verbose = True) as cisco:
       cisco.set_debuglevel(0)
-      if cisco.login(final_mode=CiscoTelnet.MODE_ENABLE):
+      if cisco.login(final_mode=CiscoTelnet.MODE_ENABLE, user="", user_pass=""):
         cisco.cmd("sh int status")
         cisco.conf(["interface fast0/1", "descr ----"])
         #cisco.wr()
         cisco.cmd("sh int status")
         #print cisco.cmd("sh version | inc uptime")
-    print "="*10
+    print "="*20
 
 if __name__ == "__main__":
   if not sys.version_info[0] == 2:
