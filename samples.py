@@ -8,11 +8,14 @@ def main():
   
   try:
     ip_range_start = sys.argv[1]
+  except IndexError:
+    print "usage: %s <START IP> [<STOP IP>]"%(sys.argv[0])
+    sys.exit(1)
+
+  try:  
     ip_range_stop = sys.argv[2]
   except IndexError:
-    print "usage: %s <IP-RANGE START> <IP-RANGE STOP>"%(sys.argv[0])
-    sys.exit(1)
-  
+    ip_range_stop = ip_range_start
 
   for ip in netaddr.iter_iprange(ip_range_start, ip_range_stop, step=1):
     host = str(ip)
