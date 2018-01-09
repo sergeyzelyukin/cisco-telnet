@@ -7,7 +7,6 @@ setup( name='ciscotelnet',
   description='handy remote access to Cisco devices via telnet',
   maintainer_email='sergey.zelyukin@gmail.com',
   keywords='cisco telnet',
-  install_requires=['telnetlib', 'getpass'],
   license='Apache License, Version 2.0',
   classifiers=[
   'Programming Language :: Python',
