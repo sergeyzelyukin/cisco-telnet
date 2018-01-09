@@ -4,5 +4,5 @@ from setuptools import setup
 
 setup (
   name="cisco-telnet"
-  py-modules=['CiscoTelnet']
+  py_modules=['cisco-telnet']
   )
