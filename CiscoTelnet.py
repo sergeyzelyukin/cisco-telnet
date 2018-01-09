@@ -13,6 +13,8 @@ MODE_ENABLE_PASS = "ENABLE PASS"
 MODE_ENABLE      = "ENABLE"
 
 WAIT_TIMEOUT     = 3
+WR_WAIT_TIMEOUT  = 10
+
 
 class CiscoTelnet(Telnet):
   def __init__(self, host, verbose = False):
@@ -140,13 +142,12 @@ class CiscoTelnet(Telnet):
     read_buffer = ""
     conf_pattern = re.compile("\)#$", re.IGNORECASE)
 
-    for line in ["conf t\n"]+config_lines:
+    for line in ["conf t\n"]+config_lines+["end"]:
       self.write(line+"\n")
       answer = self.expect([conf_pattern], WAIT_TIMEOUT)
       if answer[1]:
         read_buffer += answer[2]     
 
-    self.write("\x1A")
     answer = self.expect([self._stop_pattern], WAIT_TIMEOUT)
     if answer[1]:
       read_buffer += answer[2]
@@ -161,6 +162,14 @@ class CiscoTelnet(Telnet):
     self.read_lazy()
 
     self.write("wr\n")
-    answer = self.expect([self._stop_pattern], WAIT_TIMEOUT)
+    answer = self.expect([self._stop_pattern], WR_WAIT_TIMEOUT)
+
+    if not answer[1]:
+      return None
+    else:
+      if self._verbose:
+        print answer[2]
+      
+      return answer[2]
 
 
