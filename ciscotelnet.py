@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import sys, os, re, getpass
-from telnetlib import Telnet
+from telnetlib import Telnet, IAC, WILL, ECHO
 
 MODE_INIT        = "INIT"
 MODE_CONNECTED   = "CONNECTED"
@@ -125,16 +125,18 @@ class CiscoTelnet(Telnet):
   def cmd(self, command):
     self.read_lazy()
 
+    result = None
+
     self.write(command+"\n")
     answer = self.expect([self._stop_pattern], WAIT_TIMEOUT)
 
-    if not answer[1]:
-      return None
-    else:
+    if answer[1]:
       if self._verbose:
         print answer[2]
       
-      return answer[2]
+      result = self.remove_first_and_last_lines(answer[2])
+
+    return result
 
   def conf(self, config_lines):
     self.read_lazy()
@@ -142,12 +144,13 @@ class CiscoTelnet(Telnet):
     read_buffer = ""
     conf_pattern = re.compile("\)#$", re.IGNORECASE)
 
-    for line in ["conf t\n"]+config_lines+["end"]:
+    for line in ["conf t"]+config_lines:
       self.write(line+"\n")
       answer = self.expect([conf_pattern], WAIT_TIMEOUT)
       if answer[1]:
         read_buffer += answer[2]     
 
+    self.write("end\n")
     answer = self.expect([self._stop_pattern], WAIT_TIMEOUT)
     if answer[1]:
       read_buffer += answer[2]
@@ -155,7 +158,10 @@ class CiscoTelnet(Telnet):
     if self._verbose:
       print read_buffer
 
-    return read_buffer
+    header_pattern = re.compile("^.*?End\s+with\s+CNTL/Z.", re.IGNORECASE|re.MULTILINE|re.DOTALL)
+    read_buffer = header_pattern.sub("", read_buffer)
+
+    return self.remove_first_and_last_lines(read_buffer)
 
   @property
   def uptime(self):
@@ -171,6 +177,15 @@ class CiscoTelnet(Telnet):
 
     return uptime
 
+  @staticmethod
+  def remove_first_and_last_lines(data):
+    lines = data.split("\n")
+    if len(lines)>=0:
+      lines.pop(0)
+    if len(lines)>=0:
+      lines.pop(len(lines)-1)
+    return "\n".join(lines)
+
   def wr(self):
     self.read_lazy()
 
@@ -183,6 +198,6 @@ class CiscoTelnet(Telnet):
       if self._verbose:
         print answer[2]
       
-      return answer[2]
+      return self.remove_first_and_last_lines(answer[2])
 
 
