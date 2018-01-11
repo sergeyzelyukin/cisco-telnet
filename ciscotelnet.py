@@ -157,6 +157,19 @@ class CiscoTelnet(Telnet):
 
     return read_buffer
 
+  @property
+  def uptime(self):
+    uptime = None
+    uptime_pattern = re.compile("uptime\s+is\s+", re.IGNORECASE)
+
+    output = self.cmd("sh version | inc uptime")
+    for line in output.split("\n"):
+      match = uptime_pattern.search(line)
+      if match:
+        uptime = line
+        break
+
+    return uptime
 
   def wr(self):
     self.read_lazy()
