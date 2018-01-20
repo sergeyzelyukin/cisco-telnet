@@ -1,6 +1,9 @@
 # cisco-telnet
 Handy remote access to Cisco devices via telnet
 
+Feel free to contact me via <a href="https://t.me/sergeyzelyukin">Telegram</a>
+I speak Russian end English
+
 Quick Example:
 
 <pre>
