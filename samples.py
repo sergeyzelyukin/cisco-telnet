@@ -45,6 +45,8 @@ def main():
           print "!"*20
           print cisco.conf(["interface fast0/1", "descr %s"%("-"*10), "load-interval 300"])  # IMPORTANT: do not use "conf t" and/or "end" cli commands here
           print "!"*20
+          print cisco.conf("hostname MySwitch") # can also accept 'str' in case of single command
+          print "!"*20
           print cisco.wr() # saving
           print "!"*20
           print cisco.cmd("sh int status | inc Fa0/1")

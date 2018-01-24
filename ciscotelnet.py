@@ -144,6 +144,9 @@ class CiscoTelnet(Telnet):
     read_buffer = ""
     conf_pattern = re.compile("\)#$", re.IGNORECASE)
 
+    if type(config_lines) is str:
+      config_lines = [config_lines]
+
     for line in ["conf t"]+config_lines:
       if len(line) == 0:
         continue
