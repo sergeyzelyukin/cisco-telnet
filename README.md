@@ -29,6 +29,7 @@ with ciscotelnet.CiscoTelnet(host, verbose = False) as cisco:
     print cisco.cmd("sh int status | inc Fa0/1") # execute any command on cisco device and get raw output
     print cisco.uptime # or get results ready for treatment 
     print cisco.conf(["interface fast0/1", "descr blank", "load-interval 300"])  # IMPORTANT: do not use "conf t" and/or "end" cli commands here
+    print cisco.conf("hostname MySwitch") # can also accept 'str' in case of single command
     print cisco.wr() # saving
     print cisco.cmd("sh int status | inc Fa0/1")
     print cisco.cmd("sh proc cpu | inc CPU utiliz")
