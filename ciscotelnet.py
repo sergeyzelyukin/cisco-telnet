@@ -145,6 +145,8 @@ class CiscoTelnet(Telnet):
     conf_pattern = re.compile("\)#$", re.IGNORECASE)
 
     for line in ["conf t"]+config_lines:
+      if len(line) == 0:
+        continue
       self.write(line+"\n")
       answer = self.expect([conf_pattern], WAIT_TIMEOUT)
       if answer[1]:
