@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup( name='ciscotelnet',
-  version='0.1.3',
+  version='0.1.4',
   description='handy remote access to Cisco devices via telnet',
   maintainer_email='sergey.zelyukin@gmail.com',
   keywords='cisco telnet',

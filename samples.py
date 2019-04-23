@@ -39,15 +39,15 @@ def main():
         # if cisco.login(final_mode=ciscotelnet.MODE_ENABLE, line_pass="abcdef", enable_pass="cisco"):
         # or
         if cisco.login(final_mode=ciscotelnet.MODE_ENABLE):  # keyboard interactive
-          print cisco.cmd("sh int status | inc Fa0/1") # execute any command on cisco device and get raw output
+          print cisco.cmd("sh int status | inc Fa0/1")	# execute any command on cisco device and get raw output
           print "!"*20
-          print cisco.uptime # or get results ready for treatment 
+          print cisco.uptime				# or get results ready for treatment 
           print "!"*20
           print cisco.conf(["interface fast0/1", "descr %s"%("-"*10), "load-interval 300"])  # IMPORTANT: do not use "conf t" and/or "end" cli commands here
           print "!"*20
-          print cisco.conf("hostname MySwitch") # can also accept 'str' in case of single command
+          print cisco.conf("hostname MySwitch")		# can also accept 'str' in case of single command
           print "!"*20
-          print cisco.wr() # saving
+          print cisco.wr()				# saving
           print "!"*20
           print cisco.cmd("sh int status | inc Fa0/1")
           print "!"*20
@@ -60,6 +60,8 @@ def main():
 if __name__ == "__main__":
   if not sys.version_info[0] == 2:
     sys.exit(1)
+
+  ciscotelnet.WAIT_TIMEOUT = 60  # This is REQUIRED for routers with huge configs or with high cpu load, otherwise 'sh run' will return an empty string.
   main()
 
   

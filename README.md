@@ -6,6 +6,7 @@ Quick Example:
 <pre>
 import ciscotelnet
 
+ciscotelnet.WAIT_TIMEOUT = 60  # This is REQUIRED for routers with huge configs or with high cpu load, otherwise 'sh run' will return an empty string.
 #
 # Create cisco object. Using "verbose = True" will echo all receiving data to STDOUT. Use "with" statement for autologout and proper socket closure.
 #
@@ -22,12 +23,12 @@ with ciscotelnet.CiscoTelnet(host, verbose = False) as cisco:
   # or
   # if cisco.login(final_mode=ciscotelnet.MODE_ENABLE, line_pass="abcdef", enable_pass="cisco"):
   # or
-  if cisco.login(final_mode=ciscotelnet.MODE_ENABLE):  # keyboard interactive
-    print cisco.cmd("sh int status | inc Fa0/1") # execute any command on cisco device and get raw output
-    print cisco.uptime # or get results ready for treatment 
+  if cisco.login(final_mode=ciscotelnet.MODE_ENABLE):	# keyboard interactive
+    print cisco.cmd("sh int status | inc Fa0/1")	# execute any command on cisco device and get raw output
+    print cisco.uptime					# or get results ready for treatment 
     print cisco.conf(["interface fast0/1", "descr blank", "load-interval 300"])  # IMPORTANT: do not use "conf t" and/or "end" cli commands here
-    print cisco.conf("hostname MySwitch") # can also accept 'str' in case of single command
-    print cisco.wr() # saving
+    print cisco.conf("hostname MySwitch")		# can also accept 'str' in case of single command
+    print cisco.wr() 					# saving
     print cisco.cmd("sh int status | inc Fa0/1")
     print cisco.cmd("sh proc cpu | inc CPU utiliz")
 </pre>
